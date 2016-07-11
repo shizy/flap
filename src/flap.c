@@ -10,8 +10,7 @@
 
 //TO-DO:
 // get monitor name/number
-// get active desktop #!
-// c issues with multimon
+// expand help
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_ewmh.h>
@@ -171,14 +170,14 @@ calculate_target_geometry (Geometry *def, Geometry *win, Geometry *mon, Geometry
     yoffset = (yp) ? (mon->h * def->y / 100) : def->y;
 
     switch (xa) {
-        case 'c': fin->x = mon->x + xoffset + mon->cx - fin->cx; break;
+        case 'c': fin->x = xoffset + mon->cx - fin->cx; break;
         case 'r': fin->x = mon->x + xoffset + mon->w  - fin->w;  break;
         case 'l': fin->x = mon->x + xoffset; break;
         case 'x': fin->x = win->x + xoffset; break;
     }
 
     switch (ya) {
-        case 'c': fin->y = mon->y + yoffset + mon->cy - fin->cy; break;
+        case 'c': fin->y = yoffset + mon->cy - fin->cy; break;
         case 'b': fin->y = mon->y + yoffset + mon->h  - fin->h;  break;
         case 't': fin->y = mon->y + yoffset; break;
         case 'y': fin->y = win->y + yoffset; break;
@@ -283,7 +282,7 @@ main (int argc, char *argv[]) {
 
     if (argc <= 1) {
         printf("Usage:\n");
-        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x X[+|-OFFSET[%%]]] [-y Y[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME|MONITORNUMBER] [-f \"FORMATSTRING\"]\n");
+        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x XANCHOR[+|-OFFSET[%%]]] [-y YANCHOR[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME|MONITORNUMBER] [-f \"FORMATSTRING\"]\n");
         return 0;
     }
 
@@ -339,8 +338,9 @@ main (int argc, char *argv[]) {
     calculate_target_geometry(&def, &win, &mon, &fin);
 
     // make window adjustments
-    if (type) {
+    if (type && !format) {
         uint32_t geo[] = { fin.x, fin.y, fin.w, fin.h };
+        printf("%i %i %i %i\n", fin.x, fin.y, fin.w, fin.h);
         xcb_configure_window(c, target_window, (XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT), geo);
     }
 

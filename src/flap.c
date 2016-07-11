@@ -10,7 +10,6 @@
 
 //TO-DO:
 // get monitor name/number
-// expand help
 
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_ewmh.h>
@@ -282,7 +281,53 @@ main (int argc, char *argv[]) {
 
     if (argc <= 1) {
         printf("Usage:\n");
-        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x XANCHOR[+|-OFFSET[%%]]] [-y YANCHOR[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME|MONITORNUMBER] [-f \"FORMATSTRING\"]\n");
+        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x XANCHOR[+|-OFFSET[%%]]] [-y YANCHOR[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME|MONITORNUMBER] [-f \"FORMATSTRING\"]\n\n");
+        printf("Description:\nA window size/position tool to consistently place the same window in different sized monitors; or to calculate the size/position of a window prior to creation.\n\n");
+        printf("Options:\n\n");
+        printf(" -s SEARCHTYPE:SEARCHTERM\n");
+        printf("\tSEARCHTYPE\t - 'i', 'c' or 'n' to search for a window by instance, class, or name respectively.\n");
+        printf("\tSEARCHTERM\t - the window instance, name, or class to search by.\n\n");
+        printf(" -w WIDTH[%%]\n");
+        printf("\t WIDTH\t\t - the desired width of the window in pixels. If the optional '%%' sign is specified,\n\t\t\t   the width is calulated relative to the size of target monitor.\n");
+        printf(" -h HEIGHT[%%]\n");
+        printf("\t HEIGHT\t\t - the desired height of the window in pixels. If the optional '%%' sign is specified,\n\t\t\t   the height is calulated relative to the size of target monitor.\n");
+        printf(" -x XANCHOR[+|-OFFSET[%%]]\n");
+        printf("\t XANCHOR\t - 'x', 'l', 'c', 'r' for current x position, left, center, and right respectively.\n\t\t\t   The x anchor represents the alignment of the chosen edge of the window to that same\n\t\t\t   chosen edge of the monitor\n");
+        printf("\t XOFFSET\t - the optional offset distance or a chosen anchor. This will distance the window's\n\t\t\t   anchor edge from the target monitor's anchor edge. If the optional '%%' sign is\n\t\t\t   specified, the distance is calculated relative to the width of the target monitor.\n");
+        printf(" -y YANCHOR[+|-OFFSET[%%]]\n");
+        printf("\t YANCHOR\t - 'y', 't', 'c', 'b' for current y position, top, center, and bottom respectively.\n\t\t\t   The y anchor represents the alignment of the chosen edge of the window to that same\n\t\t\t   chosen edge of the monitor\n");
+        printf("\t YOFFSET\t - the optional offset distance or a chosen anchor. This will distance the window's\n\t\t\t   anchor edge from the target monitor's anchor edge. If the optional '%%' sign is\n\t\t\t   specified, the distance is calculated relative to the height of the target monitor.\n");
+        printf(" -v\t\t\t - show the target window.\n");
+        printf(" -i\t\t\t - hide the target window.\n");
+        printf(" -t\t\t\t - toggle the visibility the target window.\n");
+        printf(" -m\t\t\t - specify a target monitor name or monitor number to always perform relative\n\t\t\t   calulcations against.\n");
+        printf(" -f \"FORMATSTRING\"\t - If specified, does not change the size or position of the window. Instead it outputs\n\t\t\t   a format string with the calculated dimentions of the window:\n");
+        printf("\t %%%%\t\t - output a %% symbol\n");
+        printf("\t %%d\t\t - output the hexidecimal target window id\n");
+        printf("\t %%D\t\t - output the decimal target window id\n");
+        printf("\t %%r\t\t - output the hexidecimal root window id\n");
+        printf("\t %%R\t\t - output the decimal root window id\n");
+        printf("\t %%x\t\t - output the x position of the target window\n");
+        printf("\t %%X\t\t - output the x position of the target monitor\n");
+        printf("\t %%y\t\t - output the y position of the target window\n");
+        printf("\t %%Y\t\t - output the y position of the target monitor\n");
+        printf("\t %%w\t\t - output the width of the target window\n");
+        printf("\t %%W\t\t - output the width of the target monitor\n");
+        printf("\t %%h\t\t - output the height of the target window\n");
+        printf("\t %%H\t\t - output the height of the target monitor\n");
+        printf("\t %%a\t\t - output the x-center position of the target window\n");
+        printf("\t %%A\t\t - output the x-center position of the target monitor\n");
+        printf("\t %%b\t\t - output the y-center position of the target window\n");
+        printf("\t %%B\t\t - output the y-center position of the target monitor\n\n");
+        printf("Examples:\n\n");
+        printf("Position the bottom of the target window to be 10 pixels from the top of the target monitor, and the right of the target window to be 25%% of the width of the monitor from the right edge of the monitor:\n\n");
+        printf("\t flap -s n:examplewindow -x r-25%% -y t+10\n\n");
+        printf("Position the center of the window to be 10 pixels left and above the center of the target monitor:\n\n");
+        printf("\t flap -s n:examplewindow -x c-10 -y c-10\n\n");
+        printf("Resize the window to be 5 pixels below it's current location:\n\n");
+        printf("\t flap -s n:examplewindow -y y+10\n\n");
+        printf("Resize a window to be 200 pixels high and 90%% of the width of the target monitor\n\n");
+        printf("\t flap -s n:examplewindow -h 200 -w 90%%\n\n");
         return 0;
     }
 

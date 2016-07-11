@@ -7,45 +7,10 @@
  * "The Song of the Banner at Daybreak" (st. II) - Walt Whitman
  */
 
-/*
- * Formats:
- *
- * %%   %
- *
- * %w   window id
- * %p   parent id                !
- * %r   root id
- *
- * %x   x position
- * %X   x position monitor
- * %y   y position
- * %Y   y position monitor
- * %w   width
- * %W   width monitor
- * %h   height
- * %H   height monitor
- * %a   x center
- * %A   x center monitor
- * %b   y center
- * %B   y center monitor
- *
- * %m   monitor number          !
- * %M   monitor name            !
- *
- * %c   class name              ?
- * %i   instance name           ?
- * %n   wm name                 ?
- */
 
-// flap [-t TARGETWINDOW] [-w WIDTH[%]] [-h HEIGHT[%]] [-x X[+|-OFFSET[%]]] [-y Y[+|-OFFSET[%]]] [-m TARGETMONITOR|MONITORNUMBER] "FORMAT"
-
-//TODO:
-// find window *not* mandatory!
-// get %i, %c, and %n whenever a window is found (on request only)?
+//TO-DO:
 // get monitor name/number
-// attempt sprintf, then one printf
 // get active desktop #!
-// l+- and t+- issues
 // c issues with multimon
 
 #include <xcb/xcb_icccm.h>
@@ -60,10 +25,9 @@
 xcb_connection_t *c;
 xcb_ewmh_connection_t *ewmh;
 xcb_window_t root, active_window, target_window;
-char term[64], *format, *aclass,
-     *aname, *ainst, type,
+char term[64], *format = 0, type,
      wp, hp, xp, yp,
-     xa, ya;
+     xa, ya, vis;
 
 typedef struct {
     int w, h, x, y, cx, cy;
@@ -89,7 +53,6 @@ find_target_window () {
                 case 'i':
                     if (xcb_icccm_get_wm_name_reply(c, xcb_icccm_get_wm_name(c, children[i]), &instance, NULL) == 1 &&
                         !strcmp(term, instance.name)) {
-                        ainst = instance.name;
                         target_window = children[i];
                         return 1;
                     }
@@ -97,7 +60,6 @@ find_target_window () {
                 case 'n':
                     if (xcb_ewmh_get_wm_name_reply(ewmh, xcb_ewmh_get_wm_name(ewmh, children[i]), &name, NULL) == 1 &&
                         !strcmp(term, name.strings)) {
-                        aname = name.strings;
                         target_window = children[i];
                         return 1;
                     }
@@ -105,7 +67,6 @@ find_target_window () {
                 case 'c':
                     if (xcb_icccm_get_wm_class_reply(c, xcb_icccm_get_wm_class(c, children[i]), &class, NULL) == 1 &&
                         !strcmp(term, class.class_name)) {
-                        aclass = class.class_name;
                         target_window = children[i];
                         return 1;
                     }
@@ -116,6 +77,13 @@ find_target_window () {
     }
 
     return 0;
+}
+
+uint8_t
+get_window_visibility (xcb_window_t *w) {
+
+    xcb_get_window_attributes_reply_t *reply = xcb_get_window_attributes_reply(c, xcb_get_window_attributes(c, *w), NULL);
+    return reply->map_state;
 }
 
 int
@@ -199,32 +167,33 @@ calculate_target_geometry (Geometry *def, Geometry *win, Geometry *mon, Geometry
     if (def->h > -1) fin->h  = (hp) ? (mon->h * def->h / 100) : def->h;
     else             fin->h  = win->h;
     fin->cy = fin->h / 2;
-    if (xa) xoffset = (xp) ? (mon->w * def->x / 100) : def->x;
-    else    xoffset = win->x;
-    if (ya) yoffset = (yp) ? (mon->h * def->y / 100) : def->y;
-    else    yoffset = win->y;
+    xoffset = (xp) ? (mon->w * def->x / 100) : def->x;
+    yoffset = (yp) ? (mon->h * def->y / 100) : def->y;
 
     switch (xa) {
         case 'c': fin->x = mon->x + xoffset + mon->cx - fin->cx; break;
         case 'r': fin->x = mon->x + xoffset + mon->w  - fin->w;  break;
-        case 'x': fin->x = win->x + xoffset; break;
         case 'l': fin->x = mon->x + xoffset; break;
+        case 'x': fin->x = win->x + xoffset; break;
     }
 
     switch (ya) {
         case 'c': fin->y = mon->y + yoffset + mon->cy - fin->cy; break;
         case 'b': fin->y = mon->y + yoffset + mon->h  - fin->h;  break;
-        case 'y': fin->y = win->y + yoffset; break;
         case 't': fin->y = mon->y + yoffset; break;
+        case 'y': fin->y = win->y + yoffset; break;
     }
 
-    //printf("w: %i, h: %i, x: %i, y: %i, xoff: %i, yoff: %i\n", fin->w, fin->h, fin->x, fin->y, xoffset, yoffset);
+    //printf("w: %i, h: %i, x: %i, y: %i, cx: %i, cy: %i, xoff: %i, yoff: %i\n", fin->w, fin->h, fin->x, fin->y, fin->cx, fin->cy, xoffset, yoffset);
+    //printf("W: %i, H: %i, X: %i, Y: %i, CX: %i, CY: %i\n", mon->w, mon->h, mon->x, mon->y, mon->cx, mon->cy);
 }
 
 int
 format_string(char *format, Geometry *mon, Geometry *fin) {
 
-    int len = strlen(format);
+    int len = strlen(format), j = 0;
+    char *output = (char *)malloc(strlen(format) * 64);
+    memset(output, 0, strlen(format) * 64);
 
     for (int i = 0; i < len; i++) {
 
@@ -232,47 +201,47 @@ format_string(char *format, Geometry *mon, Geometry *fin) {
             if (i++ == (len-1)) return 0;
 
             switch(format[i]) {
-                case 'd': printf("0x%08x", target_window); break;
-                case 'D': printf("%i", target_window); break;
-                case 'r': printf("0x%08x", root); break;
-                case 'R': printf("%i", root); break;
-                case 'x': printf("%i", fin->x); break;
-                case 'X': printf("%i", mon->x); break;
-                case 'y': printf("%i", fin->y); break;
-                case 'Y': printf("%i", mon->y); break;
-                case 'w': printf("%i", fin->w); break;
-                case 'W': printf("%i", mon->w); break;
-                case 'h': printf("%i", fin->h); break;
-                case 'H': printf("%i", mon->h); break;
-                case 'a': printf("%i", fin->cx); break;
-                case 'A': printf("%i", mon->cx); break;
-                case 'b': printf("%i", fin->cy); break;
-                case 'B': printf("%i", mon->cy); break;
-                case 'c': printf("%s", aclass); break;
-                case 'i': printf("%s", ainst); break;
-                case 'n': printf("%s", aname); break;
+                case '%': sprintf(output + strlen(output), "%c", '%'); break;
+                case 'd': sprintf(output + strlen(output), "0x%08x", target_window); break;
+                case 'D': sprintf(output + strlen(output), "%i", target_window); break;
+                case 'r': sprintf(output + strlen(output), "0x%08x", root); break;
+                case 'R': sprintf(output + strlen(output), "%i", root); break;
+                case 'x': sprintf(output + strlen(output), "%i", fin->x); break;
+                case 'X': sprintf(output + strlen(output), "%i", mon->x); break;
+                case 'y': sprintf(output + strlen(output), "%i", fin->y); break;
+                case 'Y': sprintf(output + strlen(output), "%i", mon->y); break;
+                case 'w': sprintf(output + strlen(output), "%i", fin->w); break;
+                case 'W': sprintf(output + strlen(output), "%i", mon->w); break;
+                case 'h': sprintf(output + strlen(output), "%i", fin->h); break;
+                case 'H': sprintf(output + strlen(output), "%i", mon->h); break;
+                case 'a': sprintf(output + strlen(output), "%i", fin->cx); break;
+                case 'A': sprintf(output + strlen(output), "%i", mon->cx); break;
+                case 'b': sprintf(output + strlen(output), "%i", fin->cy); break;
+                case 'B': sprintf(output + strlen(output), "%i", mon->cy); break;
             }
-            i++;
-        }
 
-        printf("%c", format[i]);
+            j = strlen(output);
+        } else {
+            output[j++] = format[i];
+        }
     }
-    //printf("\n");
+    printf("%s", output);
+    free(output);
     return 1;
 }
 
 int
 main (int argc, char *argv[]) {
 
-    Geometry def = { -1, -1, 0, 0, 0, 0 } ;
-    format = "";
-    int monitor = 0; //temp!
+    Geometry def = { -1, -1, 0, 0, 0, 0 };
+    //int monitor = 0; //temp!
     int option;
 
-    while ((option = getopt(argc, argv, "s:w:h:x:y:m:")) != -1) {
+    // print usage if nothing is specified!!
+
+    while ((option = getopt(argc, argv, "s:w:h:x:y:m:f:vit")) != -1) {
         switch (option) {
-            //case 's': term = optarg; break;
-            case 't':
+            case 's':
                 if (!sscanf(optarg, "%1[cin]:%s", &type, term)) {
                     printf("Syntax error: invalid search parameter\n");
                     return 1;
@@ -303,19 +272,20 @@ main (int argc, char *argv[]) {
                 }
                 break;
             case 'm':
-                monitor = 1;
+                //monitor = 1;
                 break;
+            case 'f': format = optarg; break;
+            case 'v': vis = 'v'; break;
+            case 'i': vis = 'i'; break;
+            case 't': vis = 't'; break;
         }
     }
 
-    // parse mandatory argument
-    if ((argc - optind) < 1) {
-        printf("Syntax error: missing output format parameter\n");
-        return 1;
+    if (argc <= 1) {
+        printf("Usage:\n");
+        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x X[+|-OFFSET[%%]]] [-y Y[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME|MONITORNUMBER] [-f \"FORMATSTRING\"]\n");
+        return 0;
     }
-
-    char **argcmd = argv + optind;
-    format = argcmd[0];
 
     // setup xcb stuff
     if ((c = xcb_connect(NULL, NULL)) == NULL) {
@@ -349,31 +319,49 @@ main (int argc, char *argv[]) {
 
     // get active window/screen and geometry for relative calculations
     Geometry mon = { 0, 0, 0, 0, 0, 0 };
-    if (xa || ya || wp || hp || monitor || !type) {
-
-        if (!xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
-            printf("Error could not get active window\n");
-            return 1;
-        }
-
-        if(xcb_get_extension_data(c, &xcb_randr_id)->present != 1) {
-            printf("Error randr xcb extension not found\n");
-            return 1;
-        }
-
-        if (!get_monitor_by_window(&active_window, &mon)) {
-            printf("Error getting active monitor\n");
-            return 1;
-        }
-    }
-
-    Geometry fin = { 0, 0, 0, 0, 0, 0 };
-    calculate_target_geometry(&def, &win, &mon, &fin);
-    if (!format_string(format, &mon, &fin)) {
-        printf("Error parsing format string\n");
+    if (!xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
+        printf("Error could not get active window\n");
         return 1;
     }
 
+    if(xcb_get_extension_data(c, &xcb_randr_id)->present != 1) {
+        printf("Error randr xcb extension not found\n");
+        return 1;
+    }
+
+    if (!get_monitor_by_window(&active_window, &mon)) {
+        printf("Error getting active monitor\n");
+        return 1;
+    }
+
+    // final calculations
+    Geometry fin = { 0, 0, 0, 0, 0, 0 };
+    calculate_target_geometry(&def, &win, &mon, &fin);
+
+    // make window adjustments
+    if (type) {
+        uint32_t geo[] = { fin.x, fin.y, fin.w, fin.h };
+        xcb_configure_window(c, target_window, (XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT), geo);
+    }
+
+    // adjust visibility as desired
+    if (vis) {
+        if (vis == 'i' || (vis == 't' && get_window_visibility(&target_window) == XCB_MAP_STATE_VIEWABLE)) {
+            xcb_unmap_window(c, target_window);
+        } else {
+            xcb_map_window(c, target_window);
+        }
+    }
+
+    // print format string
+    if (format) {
+        if (!format_string(format, &mon, &fin)) {
+            printf("Error parsing format string\n");
+            return 1;
+        }
+    }
+
+    xcb_flush(c);
     xcb_ewmh_connection_wipe(ewmh);
     free(ewmh);
     xcb_disconnect(c);

@@ -381,7 +381,6 @@ main (int argc, char *argv[]) {
     // make window adjustments
     if (type && !format) {
         uint32_t geo[] = { fin.x, fin.y, fin.w, fin.h };
-        printf("%i %i %i %i\n", fin.x, fin.y, fin.w, fin.h);
         xcb_configure_window(c, target_window, (XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT), geo);
     }
 

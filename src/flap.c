@@ -105,13 +105,7 @@ get_window_geometry (xcb_window_t *w, Geometry *g) {
 }
 
 int
-get_monitor_by_window (xcb_window_t *w, Geometry *mon) {
-
-    Geometry awin;
-    if (!get_window_geometry(w, &awin)) {
-        printf("Error getting active window geometry\n");
-        return 0;
-    }
+get_monitor_by_point (int cx, int cy, Geometry *mon) {
 
     xcb_randr_get_screen_resources_current_reply_t *res;
     if ((res = xcb_randr_get_screen_resources_current_reply(c, xcb_randr_get_screen_resources_current(c, root), NULL)) == NULL) {
@@ -136,8 +130,8 @@ get_monitor_by_window (xcb_window_t *w, Geometry *mon) {
             xcb_randr_get_crtc_info_reply_t *crtc;
             if ((crtc = xcb_randr_get_crtc_info_reply(c, xcb_randr_get_crtc_info(c, reply->crtc, XCB_CURRENT_TIME), NULL)) != NULL) {
 
-                if ((awin.cx >= crtc->x && awin.cx <= (crtc->x + crtc->width)) &&
-                    (awin.cy >= crtc->y && awin.cy <= (crtc->y + crtc->height))) {
+                if ((cx >= crtc->x && cx < (crtc->x + crtc->width)) &&
+                    (cy >= crtc->y && cy < (crtc->y + crtc->height))) {
                     mon->x = crtc->x;
                     mon->y = crtc->y;
                     mon->w = crtc->width;
@@ -362,18 +356,26 @@ main (int argc, char *argv[]) {
     }
 
     // get active window/screen and geometry for relative calculations
-    Geometry mon = { 0, 0, 0, 0, 0, 0 };
+    /*
     if (!xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
         printf("Error could not get active window\n");
         return 1;
     }
+    */
 
     if(xcb_get_extension_data(c, &xcb_randr_id)->present != 1) {
         printf("Error randr xcb extension not found\n");
         return 1;
     }
 
-    if (!get_monitor_by_window(&active_window, &mon)) {
+    Geometry awin = { 0, 0, 0, 0, 0, 0 };
+    // attempt to grab the active window and it's geometry
+    if (xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
+        get_window_geometry(&active_window, &awin);
+    }
+
+    Geometry mon = { 0, 0, 0, 0, 0, 0 };
+    if (!get_monitor_by_point(awin.cx, awin.cy, &mon)) {
         printf("Error getting active monitor\n");
         return 1;
     }

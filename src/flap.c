@@ -355,25 +355,19 @@ main (int argc, char *argv[]) {
         }
     }
 
-    // get active window/screen and geometry for relative calculations
-    /*
-    if (!xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
-        printf("Error could not get active window\n");
-        return 1;
-    }
-    */
-
+    // ensure randr extension
     if(xcb_get_extension_data(c, &xcb_randr_id)->present != 1) {
         printf("Error randr xcb extension not found\n");
         return 1;
     }
 
-    Geometry awin = { 0, 0, 0, 0, 0, 0 };
     // attempt to grab the active window and it's geometry
+    Geometry awin = { 0, 0, 0, 0, 0, 0 };
     if (xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
         get_window_geometry(&active_window, &awin);
     }
 
+    // get active monitor
     Geometry mon = { 0, 0, 0, 0, 0, 0 };
     if (!get_monitor_by_point(awin.cx, awin.cy, &mon)) {
         printf("Error getting active monitor\n");

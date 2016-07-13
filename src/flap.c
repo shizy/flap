@@ -363,7 +363,8 @@ main (int argc, char *argv[]) {
 
     // attempt to grab the active window and it's geometry
     Geometry awin = { 0, 0, 0, 0, 0, 0 };
-    if (xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL)) {
+    xcb_ewmh_get_active_window_reply(ewmh, xcb_ewmh_get_active_window_unchecked(ewmh, 0), &active_window, NULL);
+    if (active_window) {
         get_window_geometry(&active_window, &awin);
     }
 

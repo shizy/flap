@@ -7,10 +7,6 @@
  * "The Song of the Banner at Daybreak" (st. II) - Walt Whitman
  */
 
-
-//TO-DO:
-// get monitor name/number
-
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_ewmh.h>
 #include <xcb/randr.h>
@@ -23,9 +19,8 @@
 xcb_connection_t *c;
 xcb_ewmh_connection_t *ewmh;
 xcb_window_t root, active_window, target_window;
-char term[64], *format = 0, type,
-     wp, hp, xp, yp,
-     xa, ya, vis;
+char term[64], *format = 0, *monitor = 0,
+     type, wp, hp, xp, yp, xa, ya, vis;
 
 typedef struct {
     int w, h, x, y, cx, cy;
@@ -126,6 +121,12 @@ get_monitor_by_point (int cx, int cy, Geometry *mon) {
     for (int i = 0; i < num; i++) {
 
         if ((reply = xcb_randr_get_output_info_reply(c, cookies[i], NULL)) != NULL && reply->crtc != XCB_NONE) {
+
+            if (monitor) {
+                char *oname = (char *)xcb_randr_get_output_info_name(reply);
+                oname[reply->name_len] = 0; //fix odd characters being appended to the end of the name
+                if (strcmp(oname, monitor)) continue;
+            }
 
             xcb_randr_get_crtc_info_reply_t *crtc;
             if ((crtc = xcb_randr_get_crtc_info_reply(c, xcb_randr_get_crtc_info(c, reply->crtc, XCB_CURRENT_TIME), NULL)) != NULL) {
@@ -263,9 +264,7 @@ main (int argc, char *argv[]) {
                     return 1;
                 }
                 break;
-            case 'm':
-                //monitor = 1;
-                break;
+            case 'm': monitor = optarg; break;
             case 'f': format = optarg; break;
             case 'v': vis = 'v'; break;
             case 'i': vis = 'i'; break;
@@ -275,7 +274,7 @@ main (int argc, char *argv[]) {
 
     if (argc <= 1) {
         printf("Usage:\n");
-        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x XANCHOR[+|-OFFSET[%%]]] [-y YANCHOR[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME|MONITORNUMBER] [-f \"FORMATSTRING\"]\n\n");
+        printf("flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%%]] [-h HEIGHT[%%]] [-x XANCHOR[+|-OFFSET[%%]]] [-y YANCHOR[+|-OFFSET[%%]]] [-v|-i|-t] [-m MONITORNAME] [-f \"FORMATSTRING\"]\n\n");
         printf("Description:\nA window size/position tool to consistently place the same window in different sized monitors; or to calculate the size/position of a window prior to creation.\n\n");
         printf("Options:\n\n");
         printf(" -s SEARCHTYPE:SEARCHTERM\n");
@@ -294,7 +293,7 @@ main (int argc, char *argv[]) {
         printf(" -v\t\t\t - show the target window.\n");
         printf(" -i\t\t\t - hide the target window.\n");
         printf(" -t\t\t\t - toggle the visibility the target window.\n");
-        printf(" -m\t\t\t - specify a target monitor name or monitor number to always perform relative\n\t\t\t   calulcations against.\n");
+        printf(" -m\t\t\t - specify a target monitor name to always perform relative calulcations against.\n");
         printf(" -f \"FORMATSTRING\"\t - If specified, does not change the size or position of the window. Instead it outputs\n\t\t\t   a format string with the calculated dimentions of the window:\n");
         printf("\t %%%%\t\t - output a %% symbol\n");
         printf("\t %%d\t\t - output the hexidecimal target window id\n");
@@ -370,7 +369,7 @@ main (int argc, char *argv[]) {
 
     // get active monitor
     Geometry mon = { 0, 0, 0, 0, 0, 0 };
-    if (!get_monitor_by_point(awin.cx, awin.cy, &mon)) {
+    if (!get_monitor_by_point(awin.cx, awin.cy, &mon) && !monitor) {
         printf("Error getting active monitor\n");
         return 1;
     }

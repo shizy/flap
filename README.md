@@ -21,67 +21,63 @@ $ sudo make install
 
 ## Parameters
 
-```bash
-flap [-s SEARCHTYPE:SEARCHTERM] [-w WIDTH[%]] [-h HEIGHT[%]] [-x XANCHOR[+|-OFFSET[%]]] [-y YANCHOR[+|-OFFSET[%]]] [-v|-i|-t] [-m MONITORNAME] [-f "FORMATSTRING"]<br/><br/>
-```
-
 -s SEARCHTYPE:SEARCHTERM
 ```bash
-    SEARCHTYPE              - 'i', 'c' or 'n' to search for a window by instance, class, or name respectively.
-    SEARCHTERM              - the window instance, name, or class to search by.
+    SEARCHTYPE     - "i", "c" or "n" to search for a window by instance, class, or name respectively.
+    SEARCHTERM     - the window instance, name, or class to search by.
 ```
  -w WIDTH[%]
  ```bash
-     WIDTH                  - the desired width of the window in pixels. If the optional '%' sign is specified,
-                              the width is calulated relative to the size of target monitor.
+    WIDTH          - the desired width of the window in pixels. If the optional "%" sign is specified,
+                      the width is calulated relative to the size of target monitor.
 ```
  -h HEIGHT[%]
  ```bash
-     HEIGHT                 - the desired height of the window in pixels. If the optional '%' sign is specified,
-                              the height is calulated relative to the size of target monitor.
+     HEIGHT        - the desired height of the window in pixels. If the optional "%" sign is specified,
+                     the height is calulated relative to the size of target monitor.
 ```
  -x XANCHOR[+|-OFFSET[%]]
  ```bash
-     XANCHOR                - 'x', 'l', 'c', 'r' for current x position, left, center, and right respectively.
-                              The x anchor represents the alignment of the chosen edge of the window to that same
-                              chosen edge of the monitor.
-     XOFFSET                - the optional offset distance or a chosen anchor. This will distance the window's
-                              anchor edge from the target monitor's anchor edge. If the optional '%' sign is
-                              specified, the distance is calculated relative to the width of the target monitor.
+     XANCHOR       - "x", "l", "c", "r" for current x position, left, center, and right respectively.
+                     The x anchor represents the alignment of the chosen edge of the window to that same
+                     chosen edge of the monitor.
+     XOFFSET       - the optional offset distance or a chosen anchor. This will distance the window's
+                     anchor edge from the target monitor's anchor edge. If the optional "%" sign is
+                     specified, the distance is calculated relative to the width of the target monitor.
 ```
  -y YANCHOR[+|-OFFSET[%]]
  ```bash
-     YANCHOR                - 'y', 't', 'c', 'b' for current y position, top, center, and bottom respectively.
-                              The y anchor represents the alignment of the chosen edge of the window to that same
-                              chosen edge of the monitor.
-     YOFFSET                - the optional offset distance or a chosen anchor. This will distance the window's
-                              anchor edge from the target monitor's anchor edge. If the optional '%' sign is
-                              specified, the distance is calculated relative to the height of the target monitor.
+     YANCHOR       - "y", "t", "c", "b" for current y position, top, center, and bottom respectively.
+                     The y anchor represents the alignment of the chosen edge of the window to that same
+                     chosen edge of the monitor.
+     YOFFSET       - the optional offset distance or a chosen anchor. This will distance the window's
+                     anchor edge from the target monitor's anchor edge. If the optional "%" sign is
+                     specified, the distance is calculated relative to the height of the target monitor.
 ```
- -v                         - show the target window.
- -i                         - hide the target window.
- -t                         - toggle the visibility the target window.
- -m                         - specify a target monitor name to always perform relative calulcations against.
+ -v                - show the target window.
+ -i                - hide the target window.
+ -t                - toggle the visibility the target window.
+ -m                - specify a target monitor name to always perform relative calulcations against.
  ```bash
- -f "FORMATSTRING"          - If specified, does not change the size or position of the window. Instead it outputs
-                              a format string with the calculated dimentions of the window:
-                 %%         - output a % symbol
-                 %d         - output the hexidecimal target window id
-                 %D         - output the decimal target window id
-                 %r         - output the hexidecimal root window id
-                 %R         - output the decimal root window id
-                 %x         - output the x position of the target window
-                 %X         - output the x position of the target monitor
-                 %y         - output the y position of the target window
-                 %Y         - output the y position of the target monitor
-                 %w         - output the width of the target window
-                 %W         - output the width of the target monitor
-                 %h         - output the height of the target window
-                 %H         - output the height of the target monitor
-                 %a         - output the x-center position of the target window
-                 %A         - output the x-center position of the target monitor
-                 %b         - output the y-center position of the target window
-                 %B         - output the y-center position of the target monitor
+ -f "FORMATSTRING" - If specified, does not change the size or position of the window. Instead it outputs
+                     a format string with the calculated dimentions of the window:
+         %%        - output a % symbol
+         %d        - output the hexidecimal target window id
+         %D        - output the decimal target window id
+         %r        - output the hexidecimal root window id
+         %R        - output the decimal root window id
+         %x        - output the x position of the target window
+         %X        - output the x position of the target monitor
+         %y        - output the y position of the target window
+         %Y        - output the y position of the target monitor
+         %w        - output the width of the target window
+         %W        - output the width of the target monitor
+         %h        - output the height of the target window
+         %H        - output the height of the target monitor
+         %a        - output the x-center position of the target window
+         %A        - output the x-center position of the target monitor
+         %b        - output the y-center position of the target window
+         %B        - output the y-center position of the target monitor
 ```
 
 ## Examples

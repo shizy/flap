@@ -176,9 +176,6 @@ calculate_target_geometry (Geometry *def, Geometry *win, Geometry *mon, Geometry
         case 't': fin->y = mon->y + yoffset; break;
         case 'y': fin->y = win->y + yoffset; break;
     }
-
-    //printf("w: %i, h: %i, x: %i, y: %i, cx: %i, cy: %i, xoff: %i, yoff: %i\n", fin->w, fin->h, fin->x, fin->y, fin->cx, fin->cy, xoffset, yoffset);
-    //printf("W: %i, H: %i, X: %i, Y: %i, CX: %i, CY: %i\n", mon->w, mon->h, mon->x, mon->y, mon->cx, mon->cy);
 }
 
 int
@@ -227,10 +224,7 @@ int
 main (int argc, char *argv[]) {
 
     Geometry def = { -1, -1, 0, 0, 0, 0 };
-    //int monitor = 0; //temp!
     int option;
-
-    // print usage if nothing is specified!!
 
     while ((option = getopt(argc, argv, "s:w:h:x:y:m:f:vit")) != -1) {
         switch (option) {
@@ -378,19 +372,19 @@ main (int argc, char *argv[]) {
     Geometry fin = { 0, 0, 0, 0, 0, 0 };
     calculate_target_geometry(&def, &win, &mon, &fin);
 
-    // make window adjustments
-    if (type && !format) {
-        uint32_t geo[] = { fin.x, fin.y, fin.w, fin.h };
-        xcb_configure_window(c, target_window, (XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT), geo);
-    }
-
     // adjust visibility as desired
-    if (vis) {
+    if (vis && !format) {
         if (vis == 'i' || (vis == 't' && get_window_visibility(&target_window) == XCB_MAP_STATE_VIEWABLE)) {
             xcb_unmap_window(c, target_window);
         } else {
             xcb_map_window(c, target_window);
         }
+    }
+
+    // make window adjustments
+    if (type && !format) {
+        uint32_t geo[] = { fin.x, fin.y, fin.w, fin.h };
+        xcb_configure_window(c, target_window, (XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT), geo);
     }
 
     // print format string

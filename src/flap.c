@@ -11,6 +11,7 @@
 #include <xcb/xcb_ewmh.h>
 #include <xcb/randr.h>
 #include <xcb/xcb.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -279,10 +280,10 @@ main (int argc, char *argv[]) {
         printf("\t HEIGHT\t\t - the desired height of the window in pixels. If the optional '%%' sign is specified,\n\t\t\t   the height is calulated relative to the size of target monitor.\n");
         printf(" -x XANCHOR[+|-OFFSET[%%]]\n");
         printf("\t XANCHOR\t - 'x', 'l', 'c', 'r' for current x position, left, center, and right respectively.\n\t\t\t   The x anchor represents the alignment of the chosen edge of the window to that same\n\t\t\t   chosen edge of the monitor\n");
-        printf("\t XOFFSET\t - the optional offset distance or a chosen anchor. This will distance the window's\n\t\t\t   anchor edge from the target monitor's anchor edge. If the optional '%%' sign is\n\t\t\t   specified, the distance is calculated relative to the width of the target monitor.\n");
+        printf("\t XOFFSET\t - the optional offset distance for a chosen anchor. This will distance the window's\n\t\t\t   anchor edge from the target monitor's anchor edge. If the optional '%%' sign is\n\t\t\t   specified, the distance is calculated relative to the width of the target monitor.\n");
         printf(" -y YANCHOR[+|-OFFSET[%%]]\n");
         printf("\t YANCHOR\t - 'y', 't', 'c', 'b' for current y position, top, center, and bottom respectively.\n\t\t\t   The y anchor represents the alignment of the chosen edge of the window to that same\n\t\t\t   chosen edge of the monitor\n");
-        printf("\t YOFFSET\t - the optional offset distance or a chosen anchor. This will distance the window's\n\t\t\t   anchor edge from the target monitor's anchor edge. If the optional '%%' sign is\n\t\t\t   specified, the distance is calculated relative to the height of the target monitor.\n");
+        printf("\t YOFFSET\t - the optional offset distance for a chosen anchor. This will distance the window's\n\t\t\t   anchor edge from the target monitor's anchor edge. If the optional '%%' sign is\n\t\t\t   specified, the distance is calculated relative to the height of the target monitor.\n");
         printf(" -v\t\t\t - show the target window.\n");
         printf(" -i\t\t\t - hide the target window.\n");
         printf(" -t\t\t\t - toggle the visibility the target window.\n");

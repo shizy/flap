@@ -41,7 +41,7 @@ $ sudo make install
      XANCHOR       - "x", "l", "c", "r" for current x position, left, center, and right respectively.
                      The x anchor represents the alignment of the chosen edge of the window to that same
                      chosen edge of the monitor.
-     XOFFSET       - the optional offset distance or a chosen anchor. This will distance the window's
+     XOFFSET       - the optional offset distance for a chosen anchor. This will distance the window's
                      anchor edge from the target monitor's anchor edge. If the optional "%" sign is
                      specified, the distance is calculated relative to the width of the target monitor.
 ```
@@ -50,14 +50,14 @@ $ sudo make install
      YANCHOR       - "y", "t", "c", "b" for current y position, top, center, and bottom respectively.
                      The y anchor represents the alignment of the chosen edge of the window to that same
                      chosen edge of the monitor.
-     YOFFSET       - the optional offset distance or a chosen anchor. This will distance the window's
+     YOFFSET       - the optional offset distance for a chosen anchor. This will distance the window's
                      anchor edge from the target monitor's anchor edge. If the optional "%" sign is
                      specified, the distance is calculated relative to the height of the target monitor.
 ```
- -v                - show the target window.
- -i                - hide the target window.
- -t                - toggle the visibility the target window.
- -m                - specify a target monitor name to always perform relative calulcations against.
+ -v                - show the target window.<br/>
+ -i                - hide the target window.<br/>
+ -t                - toggle the visibility the target window.<br/>
+ -m                - specify a target monitor name to always perform relative calulcations against.<br/>
 ```
  -f "FORMATSTRING" - If specified, does not change the size or position of the window. Instead it outputs
                      a format string with the calculated dimentions of the window:

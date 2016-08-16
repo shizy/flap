@@ -11,7 +11,6 @@
 #include <xcb/xcb_ewmh.h>
 #include <xcb/randr.h>
 #include <xcb/xcb.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>

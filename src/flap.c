@@ -337,7 +337,8 @@ main (int argc, char *argv[]) {
     // find target window
     Geometry win = { 0, 0, 0, 0, 0, 0 };
     if (type) {
-        if (!find_target_window()) {
+        find_target_window();
+        if (target_window <= 0) {
             printf("Could not find window: %s\n", term);
             return 1;
         }

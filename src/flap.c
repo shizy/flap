@@ -167,6 +167,7 @@ calculate_target_geometry (Geometry *def, Geometry *win, Geometry *mon, Geometry
         case 'r': fin->x = mon->x + xoffset + mon->w  - fin->w;  break;
         case 'l': fin->x = mon->x + xoffset; break;
         case 'x': fin->x = win->x + xoffset; break;
+        default:  fin->x = win->x; break;
     }
 
     switch (ya) {
@@ -174,6 +175,7 @@ calculate_target_geometry (Geometry *def, Geometry *win, Geometry *mon, Geometry
         case 'b': fin->y = mon->y + yoffset + mon->h  - fin->h;  break;
         case 't': fin->y = mon->y + yoffset; break;
         case 'y': fin->y = win->y + yoffset; break;
+        default:  fin->y = win->y; break;
     }
 }
 

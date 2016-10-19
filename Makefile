@@ -1,6 +1,5 @@
 TARGET = flap
 SDIR = src
-PREFIX = /usr/bin
 BINDIR = ${PREFIX}/bin
 
 CC = gcc
